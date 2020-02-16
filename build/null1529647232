@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Ant-Version: Apache Ant 1.9.7
+Created-By: 1.8.0_212-b04 ()
+Codebase: C:\Users\Samue\OneDrive - University of Reading\Year 2\Java\
+ Android\FlyingDrones\dist
+Application-Library-Allowable-Codebase: C:\Users\Samue\OneDrive - Univ
+ ersity of Reading\Year 2\Java\Android\FlyingDrones\dist
+Caller-Allowable-Codebase: C:\Users\Samue\OneDrive - University of Rea
+ ding\Year 2\Java\Android\FlyingDrones\dist
+Permissions: sandbox
+Application-Name: MyGame
+

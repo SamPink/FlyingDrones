@@ -21,8 +21,8 @@ import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
-import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Sphere;
+import com.jme3.system.AppSettings;
 import java.util.Random;
 
 /**
@@ -32,6 +32,21 @@ import java.util.Random;
  * @author normenhansen
  */
 public class Main extends SimpleApplication implements ActionListener {
+
+    private static AppSettings initSettings() {
+        AppSettings cfg = new AppSettings(true);
+        cfg.setFrameRate(60); // set to less than or equal screen refresh rate
+        cfg.setVSync(true);   // prevents page tearing
+        cfg.setFrequency(60); // set to screen refresh rate
+        cfg.setResolution(1024, 768);   
+        cfg.setFullscreen(false); 
+        cfg.setSamples(2);    // anti-aliasing
+        cfg.setTitle("My jMonkeyEngine 3 Game"); // branding: window name
+        // branding: load splashscreen from assets
+        cfg.setSettingsDialogImage("Interface/MySplashscreen.png");
+        return cfg;
+    }
+
 
     private Spatial sceneModel;
     private BulletAppState bulletAppState;
@@ -47,14 +62,19 @@ public class Main extends SimpleApplication implements ActionListener {
     private final Vector3f camDir = new Vector3f();
     private final Vector3f camLeft = new Vector3f();
 
-    public static void main(String[] args) {
+    public static void main(String[] args) {   
         Main app = new Main();
+        
+        app.setSettings(initSettings());
+        
+        app.setShowSettings(false);
+       
         app.start();
     }
 
     @Override
     public void simpleInitApp() {
-        
+
         initMark();
         initCrossHairs();
         /**
@@ -68,17 +88,14 @@ public class Main extends SimpleApplication implements ActionListener {
         viewPort.setBackgroundColor(new ColorRGBA(0.7f, 0.8f, 1f, 1f));
         flyCam.setMoveSpeed(100);
         setUpKeys();
-        //setUpLight();
-        
-
+        setUpLight();
 
         // We load the scene from the zip file and adjust its size.
-        //assetManager.registerLocator("town.zip", ZipLocator.class);
-        //sceneModel = assetManager.loadModel("main.scene");
-        //sceneModel.setLocalScale(2f);
-        
-        sceneModel = assetManager.loadModel("Scenes/leve1.j3o");
-        rootNode.attachChild(sceneModel);
+        assetManager.registerLocator("town.zip", ZipLocator.class);
+        sceneModel = assetManager.loadModel("main.scene");
+        sceneModel.setLocalScale(2f);
+        //sceneModel = assetManager.loadModel("Scenes/leve1.j3o");
+        //rootNode.attachChild(sceneModel);
 
         // We set up collision detection for the scene by creating a
         // compound collision shape and a static RigidBodyControl with mass zero.
@@ -99,42 +116,40 @@ public class Main extends SimpleApplication implements ActionListener {
         //physics location.
         player.getPlayer().setGravity(new Vector3f(0, 0, 0));
         player.getPlayer().setPhysicsLocation(new Vector3f(0, 50, 0));
-        
+
         ships = new Node("Ships");
-        
+
         rootNode.attachChild(ships);
-        
+
         createShip();
     }
 
     public void createShip() {
-        
-        
-        
-            Material defaultMat = new Material( assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-            Vector3f location = cam.getLocation();
-        for (int i = 0; i < 25; i++) {
-            Random r = new Random();
-            System.out.println(i);
-          /** Load a model. Uses model and texture from jme3-test-data library! */
-            Spatial teapot = assetManager.loadModel("Models/Duck/Duck.j3o");
-            teapot.setMaterial(defaultMat);
-            teapot.setLocalTranslation(
-                (location.x*i),
-                (location.y*i),
-                (location.z*i)
-            );
-            teapot.scale(5);
-            teapot.setName(String.valueOf(i));
-            
-            CollisionShape sceneShape = CollisionShapeFactory.createMeshShape(teapot);
-            RigidBodyControl thing = new RigidBodyControl(sceneShape, 0);
-            
-            teapot.addControl(thing);
-            
-            bulletAppState.getPhysicsSpace().add(thing);
-            
-            ships.attachChild(teapot);      
+
+        Material defaultMat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+        Vector3f location = cam.getLocation();
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 5; j++) {
+                Random r = new Random();
+                
+                Spatial teapot = assetManager.loadModel("Models/Duck/Duck.j3o");
+                teapot.setMaterial(defaultMat);
+                teapot.setLocalTranslation(
+                        (r.nextInt(50)),
+                        (50),
+                        (i*j*3)
+                );
+                teapot.scale(5);
+
+                CollisionShape sceneShape = CollisionShapeFactory.createMeshShape(teapot);
+                RigidBodyControl thing = new RigidBodyControl(sceneShape, 0);
+
+                teapot.addControl(thing);
+
+                bulletAppState.getPhysicsSpace().add(thing);
+
+                ships.attachChild(teapot);
+            }
         }
     }
 
@@ -235,14 +250,14 @@ public class Main extends SimpleApplication implements ActionListener {
         // 4. Print the results
         System.out.println("----- Collisions? " + results.size() + "-----");
         if (results.size() > 0) {
-            
+
             // The closest collision point is what was truly hit:
             CollisionResult closest = results.getClosestCollision();
             // Let's interact - we mark the hit with a red dot.
             mark.setLocalTranslation(closest.getContactPoint());
             rootNode.attachChild(mark);
             closest.getGeometry().removeFromParent();
-            
+
         } else {
             // No hits? Then remove the red mark.
             rootNode.detachChild(mark);
@@ -261,7 +276,7 @@ public class Main extends SimpleApplication implements ActionListener {
     @Override
     public void simpleUpdate(float tpf) {
 
-        camDir.set(cam.getDirection()).multLocal(1f); //move at 2x the camera speed in curent direction
+        camDir.set(cam.getDirection()).multLocal(1.5f); //move at 2x the camera speed in curent direction
         camLeft.set(cam.getLeft()).multLocal(0.4f);
 
         walkDirection.set(0, 0, 0);
